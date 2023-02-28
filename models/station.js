@@ -3,7 +3,7 @@ const db = require("../db");
 const { NotFoundError } = require("../expressError");
 
 /**
- * Charging Station class for cstation.
+ * Related functions for station.
  */
 
 class Station {
