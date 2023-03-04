@@ -1,22 +1,22 @@
 /**Express app for c-station */
 
-require("dotenv").config();
+// require("dotenv").config();
 const express = require('express');
 const cors = require("cors");
 const { NotFoundError } = require('./expressError');
+const { authenticateJWT } = require("./middleware/auth");
 
 const app = express();
-app.use(cors());
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/auth");
 const stationRoutes = require("./routes/station");
 const reviewRoutes = require("./routes/review");
 
-
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(authenticateJWT);
 
 app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
