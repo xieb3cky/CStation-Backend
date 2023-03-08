@@ -5,23 +5,24 @@
 const jsonschema = require("jsonschema");
 const express = require("express");
 const { ensureLoggedIn } = require("../middleware/auth");
-
-//ensure curr user middleware 
-
 const Station = require("../models/station");
 
 const newStationSchema = require("../schemas/stationNew.json");
-
 const router = express.Router();
-
 const { getEVChargers } = require("../helpers/openCharger");
 
 
-//get request to openchargerAPI when user new search
+/** POST / { search form data} =>  { stations }
+ *
+ * Search form data { lat, long, charger type, results}
+ *
+ * Returns { stations }
+ *
+ */
 router.post("/newSearch", async function (req, res, next) {
     try {
         const stations = await getEVChargers(req.body);
-        // console.log(req.body)
+
         return res.json({ stations });
     } catch (err) {
         return next(err);
@@ -30,9 +31,9 @@ router.post("/newSearch", async function (req, res, next) {
 
 
 /**
- * POST /station {station} => {station}
+ * POST / {station} => {station}
  * 
- * Station data should be {id, name, address, charger_type, lat, long, supercharger, available}
+ * Station data  {id, name, address, charger_type, lat, long, supercharger, available}
  * 
  * Authorization required: logged in/curr user.
  */
@@ -53,8 +54,9 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 
-/** GET /station/:id  =>
- *   { station: {id, name, address, charger_type, lat, long, supercharger, available} }
+/** GET /station/:id  => {station}
+ * 
+ *  Station {id, name, address, charger_type, lat, long, supercharger, available} 
  *  
  * Authorization required: logged in user
  */
@@ -63,13 +65,19 @@ router.get("/:id", ensureLoggedIn, async function (req, res, next) {
     try {
         const stationId = req.params.id;
         const station = await Station.get(stationId);
-        console.log(station)
         return res.json({ station });
     } catch (err) {
         return next(err);
     }
 });
 
+
+/** Delete /station/:id  
+ * 
+ * Delete station from database.
+ * 
+ * Authorization required: logged in user
+ */
 
 router.delete("/:id", ensureLoggedIn, async function (req, res, next) {
     try {
