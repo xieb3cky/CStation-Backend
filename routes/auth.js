@@ -63,43 +63,16 @@ router.post("/register", async function (req, res, next) {
 });
 
 
-/** POST /auth/login:   { user } => { token }
- *
- * Required data : { username, password, firstName, lastName, email }
- *
- * Returns JWT token which can be used to authenticate further requests.
- * 
- */
-
-router.post("/login", async function (req, res, next) {
-    try {
-        const validator = jsonschema.validate(req.body, userAuthSchema);
-        if (!validator.valid) {
-            const errs = validator.errors.map(e => e.stack);
-            throw new BadRequestError(errs);
-        }
-
-        const { username, password } = req.body;
-        let user = await User.authenticate(username, password);
-        const token = createToken(user);
-        return res.json({ token });
-    } catch (err) {
-        return next(err);
-    }
-});
-
-
 
 /** Get/auth/favorites/ 
  *
- * return all of the user's favorites stations information
+ * Return all of the user's favorites stations information
  * 
  * Authorization required: same-user-as-:username
  * */
 
 router.get("/favorites/:user_id", async function (req, res, next) {
     try {
-
         const result = await User.getAllFav(req.params.user_id);
         return res.json({ result });
     } catch (err) {
