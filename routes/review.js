@@ -12,14 +12,7 @@ const router = express.Router();
 const newReviewSchema = require("../schemas/reviewNew.json");
 
 
-/**
- * req.body = {
- * user_id
- * stationData,
- * reviewData,
- * 
- * }
- */
+
 router.post("/", async function (req, res, next) {
     try {
         const validator = jsonschema.validate(req.body, newReviewSchema);
@@ -27,12 +20,6 @@ router.post("/", async function (req, res, next) {
             const errs = validator.errors.map(e => e.stack);
             throw new BadRequestError(errs);
         }
-        //save station to db if not in db
-        // const res = await Station.save(req.body);
-        // console.log(res)
-        // const { user_id } = req.body;
-        // const review = await Review.create(reviewData, user_id);
-        // return res.status(201).json({ review });
     } catch (err) {
         return next(err);
     }
