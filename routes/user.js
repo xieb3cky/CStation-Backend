@@ -23,7 +23,7 @@ const router = express.Router();
 
 /** GET /user/:[username] => { user }
  *
- * Returns { username, firstName, lastName, bio, profile_img, cover_img }
+ * Returns { username, firstName, lastName, profile_img}
  * 
  * Authorization required: same user-as-:username
  **/
@@ -44,9 +44,9 @@ router.get("/:username", ensureCorrectUser, async function (req, res, next) {
 /** PATCH /user/:id { user } => { user }
  *
  * Data can include:
- *   { username, firstName, lastName, password, email, bio, profile_img, cover_img }
+ *   { username, firstName, lastName, password, email, profile_img}
  *
- * Returns { username, firstName, lastName, password, email, bio, profile_img, cover_img }
+ * Returns { username, firstName, lastName, password, email, profile_img }
  *
  * Authorization required:  same-user-as-:username
  **/
@@ -58,7 +58,6 @@ router.patch("/:username", ensureCorrectUser, async function (req, res, next) {
             const errs = validator.errors.map(e => e.stack);
             throw new BadRequestError(errs);
         }
-
         const username = req.params.username;
         const user = await User.update(username, req.body)
         return res.json({ user });
@@ -68,7 +67,7 @@ router.patch("/:username", ensureCorrectUser, async function (req, res, next) {
 });
 
 
-/** DELETE /[username]  =>  { deleted: username }
+/** DELETE /[id]  =>  { deleted: username }
  *
  * Authorization required: same-user-as-:username
  **/
@@ -98,7 +97,7 @@ router.post("/favorites", ensureCorrectUser, async function (req, res, next) {
         const { user_id, id } = req.body;
         //adds the favorite
         await Favorite.add(user_id, id);
-        return res.json("hello");
+        return res.json({ favorited: id });
     } catch (err) {
         return next(err);
     }
@@ -106,12 +105,11 @@ router.post("/favorites", ensureCorrectUser, async function (req, res, next) {
 
 router.post("/delete-favorite", ensureCorrectUser, async function (req, res, next) {
     try {
-        //get station id
         const { user_id, station_id } = req.body
         let sid = await Favorite.get(user_id, station_id);
         let to_delete = sid.rows[0].id
         await Favorite.delete(to_delete)
-        return res.json("hello");
+        return res.json({ deleted: to_delete });
     } catch (err) {
         return next(err);
     }
