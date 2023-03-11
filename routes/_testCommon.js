@@ -1,103 +1,116 @@
-// "use strict";
+"use strict";
 
-// const db = require("../db.js");
-// const User = require("../models/user");
+const db = require("../db.js");
+const User = require("../models/user");
+const Station = require("../models/station");
+const Favorites = require("../models/favorites");
+const { createToken } = require("../helpers/tokens");
 
-// const { createToken } = require("../helpers/tokens");
+const favoritesId = [];
 
-// const testJobIds = [];
+/**
+ * Common setup tasks for all tests.
+ * 
+ * Delete all users and stations data. 
+ * 
+ * Creates two test users and two stations, register test user, one who favorites a station. 
+ */
+async function commonBeforeAll() {
+    await db.query("DELETE FROM users");
+    await db.query("DELETE FROM stations");
 
-// async function commonBeforeAll() {
-//   // noinspection SqlWithoutWhere
-//   await db.query("DELETE FROM users");
-//   // noinspection SqlWithoutWhere
-//   await db.query("DELETE FROM companies");
+    await Station.save(
+        {
+            id: 123,
+            name: "JFK Supercharger",
+            address: "123 Address JFK Queens NY, NY",
+            lat: "40.641312",
+            long: "-73.778137",
+            charger_type: "27",
+            phone: "123-456-789",
+            email: "JFKcharger@email.com",
+            available: 10,
+        });
+    await Station.save(
+        {
+            id: 456,
+            name: "Laguardia Airport",
+            address: "456 Address Laguardia Queens NY, NY",
+            lat: "40.776928",
+            long: "-73.873962",
+            charger_type: "2",
+            phone: "456-789-9101",
+            email: "Laguardiacharger@email.com",
+            available: 5,
+        });
 
-//   await Company.create(
-//     {
-//       handle: "c1",
-//       name: "C1",
-//       numEmployees: 1,
-//       description: "Desc1",
-//       logoUrl: "http://c1.img",
-//     });
-//   await Company.create(
-//     {
-//       handle: "c2",
-//       name: "C2",
-//       numEmployees: 2,
-//       description: "Desc2",
-//       logoUrl: "http://c2.img",
-//     });
-//   await Company.create(
-//     {
-//       handle: "c3",
-//       name: "C3",
-//       numEmployees: 3,
-//       description: "Desc3",
-//       logoUrl: "http://c3.img",
-//     });
+    await User.register({
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        password: "password1",
+    });
 
-//   testJobIds[0] = (await Job.create(
-//     { title: "J1", salary: 1, equity: "0.1", companyHandle: "c1" })).id;
-//   testJobIds[1] = (await Job.create(
-//     { title: "J2", salary: 2, equity: "0.2", companyHandle: "c1" })).id;
-//   testJobIds[2] = (await Job.create(
-//     { title: "J3", salary: 3, /* equity null */ companyHandle: "c1" })).id;
+    await User.register({
+        username: "u2",
+        firstName: "U2F",
+        lastName: "U2L",
+        email: "user2@user.com",
+        password: "password2",
+    });
+    await User.applyToJob("u1", testJobIds[0]);
 
-//   await User.register({
-//     username: "u1",
-//     firstName: "U1F",
-//     lastName: "U1L",
-//     email: "user1@user.com",
-//     password: "password1",
-//     isAdmin: false,
-//   });
-//   await User.register({
-//     username: "u2",
-//     firstName: "U2F",
-//     lastName: "U2L",
-//     email: "user2@user.com",
-//     password: "password2",
-//     isAdmin: false,
-//   });
-//   await User.register({
-//     username: "u3",
-//     firstName: "U3F",
-//     lastName: "U3L",
-//     email: "user3@user.com",
-//     password: "password3",
-//     isAdmin: false,
-//   });
+    //add station to user's favorites
+    favoritesId[0] = (await Favorites.add(1, 456))
+    favoritesId[1] = (await Favorites.add(1, 123))
+    favoritesId[2] = (await Favorites.add(2, 123))
+}
 
-//   await User.applyToJob("u1", testJobIds[0]);
-// }
+/**
+ * Common teardown tasks for each test. 
+ * 
+ * Function begins a database transction to isolate each test from others and prevent data conflicts.
+ */
+async function commonBeforeEach() {
+    await db.query("BEGIN");
+}
 
-// async function commonBeforeEach() {
-//   await db.query("BEGIN");
-// }
+/**
+ * Common teardown tasks for each tests. 
+ * 
+ * Function rolls back the database transaction started by 'commonBeforeEach()' to undo any changes made during the tests. 
+ */
+async function commonAfterEach() {
+    await db.query("ROLLBACK");
+}
 
-// async function commonAfterEach() {
-//   await db.query("ROLLBACK");
-// }
-
-// async function commonAfterAll() {
-//   await db.end();
-// }
-
-
-// const u1Token = createToken({ username: "u1", isAdmin: false });
-// const u2Token = createToken({ username: "u2", isAdmin: false });
-// const adminToken = createToken({ username: "admin", isAdmin: true });
+/**
+ * Common teardown tasks for each tests. 
+ * 
+ * Function that peforms common teardown tasks for all tests. 
+ * 
+ * Ends database connection.
+ */
+async function commonAfterAll() {
+    await db.end();
+}
 
 
-// module.exports = {
-//   commonBeforeAll,
-//   commonBeforeEach,
-//   commonAfterEach,
-//   commonAfterAll,
-//   testJobIds,
-//   u1Token,
-//   u2Token,
-//   adminToken,
-// };
+/**
+ * Generate authentication tokens for test users, used to authenticate API requests during tests.
+ */
+
+const u1Token = createToken({ username: "u1" });
+const u2Token = createToken({ username: "u2" });
+
+
+module.exports = {
+    commonBeforeAll,
+    commonBeforeEach,
+    commonAfterEach,
+    commonAfterAll,
+    u1Token,
+    u2Token,
+    favoritesId,
+};
