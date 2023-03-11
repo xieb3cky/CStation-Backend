@@ -112,4 +112,3 @@ describe("POST /auth/register", function () {
         expect(resp.statusCode).toEqual(400);
     });
 });
-
