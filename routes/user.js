@@ -82,7 +82,9 @@ router.delete("/:id", ensureCorrectUser, async function (req, res, next) {
 
 
 
-/** POST /[username]/favorites/[station id] 
+/** POST /user/favorites/
+ * 
+ * Data: { user_id, station_id }
  *
  * Returns {"applied": station_id}
  *
