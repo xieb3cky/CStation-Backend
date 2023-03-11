@@ -23,15 +23,6 @@
         "connection_type": {
             "type": "string"
         },
-        "level": {
-            "type": "integer"
-        },
-        "supercharger": {
-            "type": "boolean"
-        },
-        "usage_cost": {
-            "type": "string"
-        },
         "phone": {
             "type": "string"
         },
