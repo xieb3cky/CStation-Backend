@@ -72,7 +72,7 @@ class User {
               first_name,
               last_name,
               email,
-              profile_img
+              profile_img)
              VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING username, first_name, last_name, email,profile_img`,
             [
